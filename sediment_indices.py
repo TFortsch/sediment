@@ -83,4 +83,4 @@ wetDekker = dekker * water
 plt.imshow(wetDekker)
 plt.show()
 
-meanDekker = np.mean(wetDekker) * np.product(wetDekker.shape) / np.sum(wetDekker>0)
+meanDekker = np.sum(wetDekker) / np.sum(wetDekker>0)
