@@ -32,7 +32,7 @@ image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
 proj = balule.projection()
 
 # Should be built into a function from here
-mosaic = image.median().clip(balule).setDefaultProjection(proj)
+mosaic = image.median().reproject(crs='EPSG:32736', scale=1)
 # G = mosaic.select('B3')
 # R = mosaic.select('B4')
 # NIR = mosaic.select('B8')
