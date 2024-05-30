@@ -20,14 +20,19 @@ balule = ee.Geometry.Polygon(
           [31.718235884786658, -24.058736909100467],
           [31.72093418705564, -24.05800214694256],
           [31.71991494762998, -24.054984679571938]], None, False)
+balule = balule.reproject(crs='EPSG:32736', scale=1)
 
 # Define source data
 image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
     .filterDate('2022-07-01', '2022-07-31')\
     .select('B2', 'B3', 'B4', 'B8', 'B11')
-        
+
+# CRS is not the same.  We need to set defaults.
+# proj = image.first().select('B2').projection() # EPSG:32656, UTM zone 56N (Siberia?), for reference, balule is EPSG:4326, lat/lon WGS 84
+proj = balule.projection()
+
 # Should be built into a function from here
-mosaic = image.median().clip(balule)
+mosaic = image.median().clip(balule).setDefaultProjection(proj)
 # G = mosaic.select('B3')
 # R = mosaic.select('B4')
 # NIR = mosaic.select('B8')
