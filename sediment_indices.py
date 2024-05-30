@@ -23,9 +23,7 @@ balule = ee.Geometry.Polygon(
 
 # Define source data
 image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
-    .filterBounds(balule)\
     .filterDate('2022-07-01', '2022-07-31')\
-    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))\
     .select('B2', 'B3', 'B4', 'B8', 'B11')
         
 # Should be built into a function from here
@@ -49,7 +47,7 @@ wetDekker = dekker.updateMask(water)
 
 # Find means
 # https://gis.stackexchange.com/questions/350771/moving-from-earth-engine-image-to-array-for-use-in-sklearn/351177#351177
-band_arrs = mosaic.reduceRegions(region=balule)
+band_arrs = mosaic.sampleRectangle(region=balule)
 
 # Get individual band arrays.
 band_arr_b4 = band_arrs.get('B4')
