@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 #ee.Authenticate(force=True)
 # Token generated with all permissions 29 May 2024, DMK
 ee.Authenticate()
-ee.Initialize(project = 'ee-davidmkahler-limpopo')
+ee.Initialize(project = 'ee-fortschthomas52')
 
 # Define analysis area
 balule = ee.Geometry.Polygon(
@@ -72,7 +72,7 @@ plt.show()
 # NDWI = ( G - NIR ) / ( G + NIR )
 ndwiG = (b3-b8)/(b3+b8) # Gao
 # NDWI = ( NIR - SWIR ) / ( NIR + SWIR )
-ndwiM = (b8-b11)/(b8_b11) # McFeeters
+ndwiM = (b8-b11)/(b8-b11) # McFeeters
 # NDWI = ( G - SWIR ) / ( G + SWIR )
 mndwi = (b3-b11)/(b3+b11) # Modified NDWI
 
