@@ -28,20 +28,20 @@ image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
         
 # Should be built into a function from here
 mosaic = image.median().clip(balule)
-G = mosaic.select('B3')
-R = mosaic.select('B4')
-NIR = mosaic.select('B8')
-SWIR = mosaic.select('B11')
+# G = mosaic.select('B3')
+# R = mosaic.select('B4')
+# NIR = mosaic.select('B8')
+# SWIR = mosaic.select('B11')
 
 # Normalized Difference Water Index (NDWI) = ( G - NIR ) / ( G + NIR )
-ndwiG = (G.subtract(NIR)).divide(G.add(NIR))  # Gao
+ndwiG = mosaic.normalizedDifference(['B3', 'B8']) # Gao
 # Normalized Difference Water Index (NDWI) = ( NIR - SWIR ) / ( NIR + SWIR )
-ndwiM = (NIR.subtract(SWIR)).divide(SWIR.add(NIR)) #McFeeters
+ndwiM = mosaic.normalizedDifference(['B8', 'B11']) #McFeeters
 # Normalized Difference Water Index (NDWI) = ( G - SWIR ) / ( G + SWIR )
-mndwi = (G.subtract(SWIR)).divide(G.add(SWIR)) # Modified NDWI
+mndwi = mosaic.normalizedDifference(['B3', 'B11']) # Modified NDWI
 
 # Dekker 2002
-dekker = (G.add(R)).divide(2)
+dekker = ((mosaic.select('B3')).add(mosaic.select('B4'))).divide(2)
 water = ndwiG.gte(-0.02)
 wetDekker = dekker.updateMask(water)
 
@@ -50,11 +50,13 @@ wetDekker = dekker.updateMask(water)
 band_arrs = mosaic.sampleRectangle(region=balule)
 
 # Get individual band arrays.
-band_arr_b4 = band_arrs.get('B4')
-band_arr_b5 = band_arrs.get('B5')
-band_arr_b6 = band_arrs.get('B6')
+band_arr_b3 = band_arrs.get('B3')   # Green
+band_arr_b4 = band_arrs.get('B4')   # Red
+band_arr_b8 = band_arrs.get('B8')   # NIR
+band_arr_b11 = band_arrs.get('B11') # SWIR
 
 # Transfer the arrays from server to client and cast as np array.
+np_arr_b3 = np.array(band_arr_b3.getInfo())
 np_arr_b4 = np.array(band_arr_b4.getInfo())
 np_arr_b5 = np.array(band_arr_b5.getInfo())
 np_arr_b6 = np.array(band_arr_b6.getInfo())
