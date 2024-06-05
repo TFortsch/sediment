@@ -11,11 +11,13 @@
 import ee
 import numpy as np
 import matplotlib.pyplot as plt
+from osgeo import ogr
+import geopandas
 
 #ee.Authenticate(force=True)
-# Token generated with all permissions 29 May 2024, DMK
 ee.Authenticate()
-ee.Initialize(project = 'ee-fortschthomas52')
+# ee.Initialize(project = 'ee-fortschthomas52')
+ee.Initialize(project = 'ee-davidmkahler-limpopo')
 
 # Define analysis area
 balule = ee.Geometry.Polygon(
@@ -25,6 +27,15 @@ balule = ee.Geometry.Polygon(
           [31.72093418705564, -24.05800214694256],
           [31.71991494762998, -24.054984679571938]], None, False)
 # the analysis area is transformed into a rectangle in the .sampleRectangle/.getInfo phases
+#file = ogr.Open("/Volumes/dmk/gis/limpopo/kruger/logger_sites/reference_polygons/balule/balule.shp")
+#shape = file.GetLayer(0) # Note all should be individual polygons
+#feature = shape.GetFeature(0)
+#first = feature.ExportToJson()
+#balule = feature.geometry()
+shpFile = geopandas.read_file('/Volumes/dmk/gis/limpopo/kruger/logger_sites/reference_polygons/balule/balule.shp')
+fc = shpFile.to_json()
+geo = ee.FeatureCollection(fc)
+balule = geo.geometry()
 
 # Define source data
 image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
