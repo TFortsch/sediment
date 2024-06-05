@@ -75,12 +75,20 @@ ndwiG = (b3-b8)/(b3+b8) # Gao
 ndwiM = (b8-b11)/(b8-b11) # McFeeters
 # NDWI = ( G - SWIR ) / ( G + SWIR )
 mndwi = (b3-b11)/(b3+b11) # Modified NDWI
+water = ndwiG > -0.02
+
 
 # Dekker 2002
 dekker = (b3+b4)/2
-water = ndwiG > -0.02
 wetDekker = dekker * water
-plt.imshow(wetDekker)
-plt.show()
+TSS1 = (b3+b4)/2
+Secchi1 = (b2/b4)
+TSS2 = (b3/b4)
+Secchi2 = (b4/b3)
+TSS3 = (b8/b3 , b8/b4)
+Secchi3 = (b4/b2)+b2
+TSS4 = (b4/b3)+b8
+#plt.imshow(wetDekker)
+#plt.show()
 
-meanDekker = np.mean(wetDekker) * np.product(wetDekker.shape) / np.sum(wetDekker>0)
+meanDekker = np.sum(wetDekker) / np.sum(wetDekker>0)

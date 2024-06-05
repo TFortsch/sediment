@@ -1,0 +1,70 @@
+import ee
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
+#ee.Authenticate(force=True)
+# Token generated with all permissions 29 May 2024, DMK
+ee.Authenticate()
+ee.Initialize(project = 'ee-fortschthomas52')
+
+# Define analysis area
+balule = ee.Geometry.Polygon(
+          [[31.717329298139624, -24.055719459004635],
+          [31.716846500516944, -24.057384943478993],
+          [31.718235884786658, -24.058736909100467],
+          [31.72093418705564, -24.05800214694256],
+          [31.71991494762998, -24.054984679571938]], None, False)
+# the analysis area is transformed into a rectangle in the .sampleRectangle/.getInfo phases
+
+# Define source data
+image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
+    .filterDate('2022-07-01', '2022-07-31')\
+    .select('B2', 'B3', 'B4', 'B8', 'B11')
+
+# CRS is not the same.
+# proj = image.first().select('B2').projection() # EPSG:32656, UTM zone 56N (Siberia?)
+# proj = balule.projection() # EPSG:4326
+
+# Export arrays
+# https://gist.github.com/jdbcode/f4d56d72f7fc5beeaa3859999b1f5c3d
+# https://gist.github.com/jdbcode/f4d56d72f7fc5beeaa3859999b1f5c3d?permalink_comment_id=3355627#gistcomment-3355627
+mosaic = image.median().reproject(crs='EPSG:32736', scale=1) # This allows us to set the resolution.
+band_arrs = mosaic.sampleRectangle(region=balule)
+
+# Get individual band arrays.
+band_arr_b2 = band_arrs.get('B2')   # Blue
+band_arr_b3 = band_arrs.get('B3')   # Green
+band_arr_b4 = band_arrs.get('B4')   # Red
+band_arr_b8 = band_arrs.get('B8')   # NIR
+band_arr_b11 = band_arrs.get('B11') # SWIR
+
+# Transfer the arrays from server to client and cast as np array.
+b2 = np.array(band_arr_b2.getInfo())   # b2  Blue
+b3 = np.array(band_arr_b3.getInfo())   # b3  Green
+b4 = np.array(band_arr_b4.getInfo())   # b4  Red
+b8 = np.array(band_arr_b8.getInfo())   # b8  NIR
+b11 = np.array(band_arr_b11.getInfo()) # b11 SWIR
+
+TSS1 = (b3+b4)/2
+Secchi1 = (b2/b4)
+TSS2 = (b3/b4)
+Secchi2 = (b4/b3)
+TSS3 = (b8/b3 , b8/b4)
+Secchi3 = (b4/b2)+b2
+TSS4 = (b4/b3)+b8
+
+data = np.array(['TSS1'])
+df = pd.DataFrame(data, columns=['TSS1'])
+print(df)
+
+#sdates = pd.date_range('2021-03-01' , periods = 10)
+#edates = pd.date_range('2021-03-10' , periods = 10)
+#values = (np.random.rand(31))
+#datesdf = pd.DataFrame({'StartDate':sdates, 'EndDate': edates })
+#print(datesdf)
+
+dates = pd.date_range(start='2022-08-01' , end='2024-05-31' , 
+              freq='10d')
+print(dates)
