@@ -11,8 +11,7 @@
 import ee
 import numpy as np
 import matplotlib.pyplot as plt
-from osgeo import ogr
-import geopandas
+import shapefile
 
 #ee.Authenticate(force=True)
 ee.Authenticate()
@@ -34,8 +33,13 @@ balule = ee.Geometry.Polygon(
 #balule = feature.geometry()
 shpFile = geopandas.read_file('/Volumes/dmk/gis/limpopo/kruger/logger_sites/reference_polygons/balule/balule.shp')
 fc = shpFile.to_json()
-geo = ee.FeatureCollection(fc)
+geo = ee.FeatureCollection(json.loads(fc))
+balule = ee.Geometry(geo)
 balule = geo.geometry()
+sf = shapefile.Reader("/Volumes/dmk/gis/limpopo/kruger/logger_sites/reference_polygons/balule/balule.shp")
+shapes = sf.shapes()
+points = shapes[0].points
+balule = ee.Geometry.Polygon(points)
 
 # Define source data
 image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
