@@ -67,7 +67,7 @@ print(df)
 
 startdates = pd.date_range(start='2022-08-01' , end='2024-05-12' , 
               freq='10d')
-enddates = pd.date_range(start = '2022-08-11' , end= '2024-05-22, 
+enddates = pd.date_range(start = '2022-08-11' , end= '2024-05-22' , 
                          freq='10d')
 print(startdates)
 print(enddates)

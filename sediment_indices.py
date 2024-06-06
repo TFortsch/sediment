@@ -15,8 +15,8 @@ import shapefile
 
 #ee.Authenticate(force=True)
 ee.Authenticate()
-# ee.Initialize(project = 'ee-fortschthomas52')
-ee.Initialize(project = 'ee-davidmkahler-limpopo')
+ee.Initialize(project = 'ee-fortschthomas52')
+#ee.Initialize(project = 'ee-davidmkahler-limpopo')
 
 # Define analysis area
 # the analysis area is transformed into a rectangle in the .sampleRectangle/.getInfo phases
@@ -30,6 +30,9 @@ aoi = ee.Geometry.Polygon(points)
 image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
     .filterDate('2022-07-01', '2022-07-31')\
     .select('B2', 'B3', 'B4', 'B8', 'B11')
+
+startDate = '2022-08-01'
+endDate = '2024-05-12'
 
 # CRS is not the same.
 # proj = image.first().select('B2').projection() # EPSG:32656, UTM zone 56N (Siberia?)
@@ -79,16 +82,43 @@ water = ndwiG > -0.02
 
 
 # Dekker 2002
-dekker = (b3+b4)/2
-wetDekker = dekker * water
+
 TSS1 = (b3+b4)/2
+TSS1 = TSS1 * water
+TSS1 = np.sum(TSS1) / np.sum(TSS1>0)
+
 Secchi1 = (b2/b4)
+Secchi1 = Secchi1 * water
+Secchi1 = np.sum(Secchi1)/ np.sum(Secchi1>0)
+
 TSS2 = (b3/b4)
+TSS2 = TSS2 * water
+TSS2 = np.sum(TSS2) / np.sum(TSS2>0)
+
 Secchi2 = (b4/b3)
+Secchi2 = Secchi2 * water
+Secchi2 = np.sum(Secchi2)/ np.sum(Secchi2>0)
+
 TSS3 = (b8/b3 , b8/b4)
+TSS3 = TSS3 * water
+TSS3 = np.sum(TSS3) / np.sum(TSS3>0)
+
 Secchi3 = (b4/b2)+b2
+Secchi3 = Secchi3 * water
+Secchi3 = np.sum(Secchi3)/ np.sum(Secchi3>0)
+
 TSS4 = (b4/b3)+b8
+TSS4 = TSS4 * water
+TSS4 = np.sum(TSS4) / np.sum(TSS4>0)
+
 #plt.imshow(wetDekker)
 #plt.show()
 
-meanDekker = np.sum(wetDekker) / np.sum(wetDekker>0)
+startDate, endDate, TSS1
+startDate, endDate, Secchi1
+startDate, endDate, TSS2
+startDate, endDate, Secchi2
+startDate, endDate, TSS3
+startDate, endDate, Secchi3
+startDate, endDate, TSS4
+
