@@ -11,20 +11,20 @@
 import ee
 import numpy as np
 import matplotlib.pyplot as plt
+import shapefile
 
 #ee.Authenticate(force=True)
-# Token generated with all permissions 29 May 2024, DMK
 ee.Authenticate()
-ee.Initialize(project = 'ee-fortschthomas52')
+# ee.Initialize(project = 'ee-fortschthomas52')
+ee.Initialize(project = 'ee-davidmkahler-limpopo')
 
 # Define analysis area
-balule = ee.Geometry.Polygon(
-          [[31.717329298139624, -24.055719459004635],
-          [31.716846500516944, -24.057384943478993],
-          [31.718235884786658, -24.058736909100467],
-          [31.72093418705564, -24.05800214694256],
-          [31.71991494762998, -24.054984679571938]], None, False)
 # the analysis area is transformed into a rectangle in the .sampleRectangle/.getInfo phases
+# enter shapefiles here:
+sf = shapefile.Reader("/Volumes/dmk/gis/limpopo/kruger/logger_sites/reference_polygons/balule/balule.shp")
+shapes = sf.shapes()
+points = shapes[0].points
+aoi = ee.Geometry.Polygon(points)
 
 # Define source data
 image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
@@ -39,7 +39,7 @@ image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
 # https://gist.github.com/jdbcode/f4d56d72f7fc5beeaa3859999b1f5c3d
 # https://gist.github.com/jdbcode/f4d56d72f7fc5beeaa3859999b1f5c3d?permalink_comment_id=3355627#gistcomment-3355627
 mosaic = image.median().reproject(crs='EPSG:32736', scale=1) # This allows us to set the resolution.
-band_arrs = mosaic.sampleRectangle(region=balule)
+band_arrs = mosaic.sampleRectangle(region=aoi)
 
 # Get individual band arrays.
 band_arr_b2 = band_arrs.get('B2')   # Blue
