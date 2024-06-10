@@ -12,6 +12,7 @@ import ee
 import numpy as np
 import matplotlib.pyplot as plt
 import shapefile
+import pandas as pd
 
 #ee.Authenticate(force=True)
 ee.Authenticate()
@@ -27,13 +28,25 @@ shapes = sf.shapes()
 points = shapes[0].points
 aoi = ee.Geometry.Polygon(points)
 
-start = '2022-08-01'
-end = '2022-08-10'
+aoi = ee.Geometry.Polygon(
+          [[31.717329298139624, -24.055719459004635],
+          [31.716846500516944, -24.057384943478993],
+          [31.718235884786658, -24.058736909100467],
+          [31.72093418705564, -24.05800214694256],
+          [31.71991494762998, -24.054984679571938]], None, False)
+
+start = pd.date_range(start= '2022-08-01' , end='2024-05-12' , 
+              freq='10d')
+end = pd.date_range(start='2022-08-10' , end='2024-05-22' , 
+              freq='10d')
+dates = pd.DataFrame ({'start': start ,  'end': end})
+
 
 def pulldata(startDate, endDate):
     # Define source data
     image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
         .filterDate(startDate, endDate)\
+        .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 10)\
         .select('B2', 'B3', 'B4', 'B8', 'B11')
 
 # CRS is not the same.
@@ -60,18 +73,32 @@ def pulldata(startDate, endDate):
     b8 = np.array(band_arr_b8.getInfo())   # b8  NIR
     b11 = np.array(band_arr_b11.getInfo()) # b11 SWIR
 
+    #np_arr_b4 = np.expand_dims(b4, 2)
+    #np_arr_b3 = np.expand_dims(b3, 2)
+    #np_arr_b2 = np.expand_dims(b2, 2)
+
+    #rgb_img = np.concatenate((np_arr_b4, np_arr_b3, np_arr_b2), 2)
+
+    #rgb_img = (255*((rgb_img)/3000)).astype('uint8')
+    #plt.imshow(rgb_img)
+    #plt.show()
+
 # Normalized Difference Water Index (NDWI) 
 # NDWI = ( G - NIR ) / ( G + NIR )
     ndwiG = (b3-b8)/(b3+b8) # Gao
 # NDWI = ( NIR - SWIR ) / ( NIR + SWIR )
-    ndwiM = (b8-b11)/(b8-b11) # McFeeters
+    ndwiM = (b8-b11)/(b8+b11) # McFeeters
 # NDWI = ( G - SWIR ) / ( G + SWIR )
     mndwi = (b3-b11)/(b3+b11) # Modified NDWI
     water = ndwiG > -0.02
 
     TSS1 = (b3+b4)/2
     TSS1 = TSS1 * water
+    #plt.imshow(TSS1 , cmap= "summer")
+    #plt.colorbar(orientation="vertical")
+    #plt.show
     TSS1 = np.sum(TSS1) / np.sum(TSS1>0)
+    #print(TSS1)
 
     Secchi1 = (b2/b4)
     Secchi1 = Secchi1 * water
@@ -104,3 +131,6 @@ def pulldata(startDate, endDate):
             str(TSS3) + ", " + str(Secchi3) + ", " + str(TSS4) + '\n') 
     f.close()
 
+for i in range(len(dates)):
+    pulldata(dates["start"][i], dates["end"][i])
+    
