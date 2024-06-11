@@ -112,9 +112,9 @@ def pulldata(startDate, endDate):
     Secchi2 = Secchi2 * water
     Secchi2 = np.sum(Secchi2)/ np.sum(Secchi2>0)
 
-    TSS3 = (b8/b3 , b8/b4)
-    TSS3 = TSS3 * water
-    TSS3 = np.sum(TSS3) / np.sum(TSS3>0)
+    #TSS3 = (b8/b3 , b8/b4)
+    #TSS3 = TSS3 * water
+    #TSS3 = np.sum(TSS3) / np.sum(TSS3>0)
 
     Secchi3 = (b4/b2)+b2
     Secchi3 = Secchi3 * water
