@@ -35,9 +35,9 @@ aoi = ee.Geometry.Polygon(
           [31.72093418705564, -24.05800214694256],
           [31.71991494762998, -24.054984679571938]], None, False)
 
-start = pd.date_range(start= '2022-08-01' , end='2024-05-12' , 
+start = pd.date_range(start= '2022-10-10' , end='2024-05-12' , 
               freq='10d')
-end = pd.date_range(start='2022-08-10' , end='2024-05-22' , 
+end = pd.date_range(start='2022-10-19' , end='2024-05-22' , 
               freq='10d')
 dates = pd.DataFrame ({'start': start ,  'end': end})
 
@@ -46,8 +46,9 @@ def pulldata(startDate, endDate):
     # Define source data
     image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')\
         .filterDate(startDate, endDate)\
-        .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 10)\
         .select('B2', 'B3', 'B4', 'B8', 'B11')
+         #.filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 10)\
+
 
 # CRS is not the same.
 # proj = image.first().select('B2').projection() # EPSG:32656, UTM zone 56N (Siberia?)
@@ -92,6 +93,16 @@ def pulldata(startDate, endDate):
     mndwi = (b3-b11)/(b3+b11) # Modified NDWI
     water = ndwiG > -0.02
 
+    TSS1 = np.NAN
+    Secchi1 = np.NAN
+    TSS2 = np.NAN
+    Secchi2 = np.NAN
+    TSS3 = np.NAN
+    Secchi3 = np.NAN
+    TSS4 = np.NAN
+
+
+
     TSS1 = (b3+b4)/2
     TSS1 = TSS1 * water
     #plt.imshow(TSS1 , cmap= "summer")
@@ -112,9 +123,9 @@ def pulldata(startDate, endDate):
     Secchi2 = Secchi2 * water
     Secchi2 = np.sum(Secchi2)/ np.sum(Secchi2>0)
 
-    #TSS3 = (b8/b3 , b8/b4)
-    #TSS3 = TSS3 * water
-    #TSS3 = np.sum(TSS3) / np.sum(TSS3>0)
+    TSS3 = (b8/b3 , b8/b4)
+    TSS3 = TSS3 * water
+    TSS3 = np.sum(TSS3) / np.sum(TSS3>0)
 
     Secchi3 = (b4/b2)+b2
     Secchi3 = Secchi3 * water

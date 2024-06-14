@@ -18,6 +18,10 @@ $$
 \frac {R}{G}
 $$
 $$
+\frac {IR}{G},\frac{IR}{R}
+$$
+
+$$
 \frac {R}{B} + {B}
 $$
 
@@ -27,6 +31,10 @@ $$
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(lubridate)
+library(dplyr)
+library(ggplot2)
 ```
 
 ## R Markdown
@@ -35,9 +43,42 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
+```{r, include=F}
+balule = read_csv("/Users/hydro3/Documents/R-Tommy/Kruger-National-Park-Sensors/balule.csv", col_names = FALSE)
+balule <- balule[1:19456, ]
+balule.datenum <-balule%>%
+    mutate(datenum = as.numeric(as_date(as_datetime(X1))))%>%
+    group_by(datenum) %>%
+    arrange(balule.datenum$X1)%>%
+    summarize(MeanTurb = mean(as.numeric(X5)))
+start = array(NA, dim = 66)
+end = start
+start[1] = as_date("2022-08-01") #start date
+for (i in c(2:66)) {
+  start[i]=start[i-1]+10
+}
+for (i in c(1:66)) {
+  end[i]=start[i]+9
+}
+dates = data.frame (start, end)
+balule$daterange = 0
+for (i in (1:nrow(balule))) {
+  test <- as_date(as_datetime(balule$X1[i]))
+  for (j in 1:nrow(dates)) {
+    if ((dates$start[j] <= test) & (test <= dates$end[j]))
+      balule$daterange[i] <- j
+  }
+}
+summary(balule.datenum)
+ggplot(data = balule.datenum, mapping = aes (x=datenum, y = MeanTurb))+
+  geom_line()
+```
+
+
 ```{r cars}
 summary(cars)
 ```
+
 
 ## Including Plots
 
