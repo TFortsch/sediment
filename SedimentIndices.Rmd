@@ -37,29 +37,37 @@ library(dplyr)
 library(ggplot2)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r, include=F}
+```{r, include =F, warning=FALSE, echo=FALSE, results='hide'}
 balule = read_csv("/Users/hydro3/Documents/R-Tommy/Kruger-National-Park-Sensors/balule.csv", col_names = FALSE)
-balule <- balule[1:19456, ]
+#balule <- balule[1:19456, ]
 balule.datenum <-balule%>%
     mutate(datenum = as.numeric(as_date(as_datetime(X1))))%>%
     group_by(datenum) %>%
-    arrange(balule.datenum$X1)%>%
     summarize(MeanTurb = mean(as.numeric(X5)))
+
+ggplot(data = balule.datenum, mapping = aes (x=as_date(datenum), y = MeanTurb))+
+  geom_line()
+```
+
+```{r, include=F, warning=F, echo=F}
+sedind10d = read_delim("/Users/hydro3/Documents/R-Tommy/sediment/Sediment_Indices.txt" , 
+                       col_names = F)
+```
+
+
+```{r, include=F}
 start = array(NA, dim = 66)
 end = start
 start[1] = as_date("2022-08-01") #start date
 for (i in c(2:66)) {
   start[i]=start[i-1]+10
 }
+
 for (i in c(1:66)) {
   end[i]=start[i]+9
 }
+
 dates = data.frame (start, end)
 balule$daterange = 0
 for (i in (1:nrow(balule))) {
@@ -69,23 +77,138 @@ for (i in (1:nrow(balule))) {
       balule$daterange[i] <- j
   }
 }
-summary(balule.datenum)
-ggplot(data = balule.datenum, mapping = aes (x=datenum, y = MeanTurb))+
-  geom_line()
+
+balule$X5 <- as.numeric(balule$X5)
+balule10day <- balule %>%
+  group_by(daterange) %>%
+  summarize(MeanTurb = mean(X5))
+
+
+#ggplot(data = )
+```
+
+```{r, include=F}
+sentinel <- read_csv("/Users/hydro3/Documents/R-Tommy/sediment/Sediment_Indices.txt", col_names = F)
+
+
+sentinel$sensor <- NA
+for (i in (1:nrow(balule10day))) {
+  sentinel$sensor[balule10day$daterange[i]] <- balule10day$MeanTurb[i]
+}
+```
+
+```{r, warning=F, echo = F}
+plot1 <- ggplot(data=sentinel, mapping= aes(x= sensor, y=X3) ) +
+  geom_point()
+X3c <- cor(sentinel$X3, sentinel$sensor, use = "complete.obs")
+```
+
+For X3, the correlation coefficient is $c=$ `r X3c`.
+
+```{r, warning=F, echo = F}
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X4) ) +
+  geom_point()
+X4c <-cor(sentinel$X4, sentinel$sensor, use = "complete.obs")
+```
+
+For X4, the correlation coefficient is $c=$ `r X4c`.
+
+```{r, warning=F, echo = F}
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X5) ) +
+  geom_point()
+X5c <- cor(sentinel$X5, sentinel$sensor, use = "complete.obs")
+```
+
+For X5, the correlation coefficient is $c=$ `r X5c`.
+
+```{r, warning=F, echo = F}
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X6) ) +
+  geom_point()
+X6c <- cor(sentinel$X6, sentinel$sensor, use = "complete.obs")
+```
+
+For X6, the correlation coefficient is $c=$ `r X6c`.
+
+```{r, warning=F, echo = F}
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X7) ) +
+  geom_point()
+X7c <- cor(sentinel$X7, sentinel$sensor, use = "complete.obs")
+```
+
+For X7, the correlation coefficient is $c=$ `r X7c`.
+
+```{r, warning=F, echo = F}
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X8) ) +
+  geom_point()
+X8c <- cor(sentinel$X8, sentinel$sensor, use = "complete.obs")
+```
+
+For X8, the correlation coefficient is $c=$ `r X8c`.
+
+```{r, warning=F, echo = F}
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X9) ) +
+  geom_point()
+X9c <- cor(sentinel$X9, sentinel$sensor, use = "complete.obs")
+```
+
+For X9, the correlation coefficient is $c=$ `r X9c`.
+
+```{r, warning=F, echo=F}
+plot1 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X3))+
+  geom_point()+
+  labs(x="Date", y="TSS1")
+
+gplot1 <- ggplotGrob(plot1)
+
+plot2 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X4))+
+  geom_point()+
+  labs(x="Date", y="Secchi1")
+
+gplot2 <- ggplotGrob(plot2)
+
+plot3 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X5))+
+  geom_point()+
+  labs(x="Date", y="TSS2")
+
+
+gplot3 <- ggplotGrob(plot3)
+
+plot4 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X6))+
+  geom_point()+
+  labs(x="Date", y="Secchi2")
+
+gplot4 <- ggplotGrob(plot4)
+
+plot5 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X7))+
+  geom_point()+
+  labs(x="Date", y="TSS3")
+
+gplot5 <- ggplotGrob(plot5)
+
+plot6 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X8))+
+  geom_point()+
+  labs(x="Date", y="Secchi3")
+
+gplot6 <- ggplotGrob(plot6)
+
+plot7 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X9))+
+  geom_point()+
+  labs(x="Date", y="TSS3")
+
+gplot7 <- ggplotGrob(plot7)
+
+plot8 <- ggplot(data = sentinel, mapping=aes(x=X1, y= sensor))+
+  geom_point()+
+  labs(x="Date", y="sensor")
+
+gplot8 <- ggplotGrob(plot8)
+
+grid::grid.newpage()
+plot9 <- grid::grid.draw(rbind(gplot1, gplot2, gplot3, gplot4))
+
+grid::grid.newpage()
+plot10 <- grid::grid.draw(rbind(gplot5, gplot6, gplot7, gplot8))
 ```
 
 
-```{r cars}
-summary(cars)
-```
 
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

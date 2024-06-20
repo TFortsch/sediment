@@ -35,10 +35,10 @@ aoi = ee.Geometry.Polygon(
           [31.72093418705564, -24.05800214694256],
           [31.71991494762998, -24.054984679571938]], None, False)
 
-start = pd.date_range(start= '2022-10-10' , end='2024-05-12' , 
-              freq='10d')
-end = pd.date_range(start='2022-10-19' , end='2024-05-22' , 
-              freq='10d')
+start = pd.date_range(start= '2023-04-01' , end='2024-05-17' , 
+              freq='5d')
+end = pd.date_range(start='2023-04-06' , end='2024-05-22' , 
+              freq='5d')
 dates = pd.DataFrame ({'start': start ,  'end': end})
 
 
@@ -100,6 +100,7 @@ def pulldata(startDate, endDate):
     TSS3 = np.NAN
     Secchi3 = np.NAN
     TSS4 = np.NAN
+    Ratio = np.NAN
 
 
 
@@ -135,11 +136,18 @@ def pulldata(startDate, endDate):
     TSS4 = TSS4 * water
     TSS4 = np.sum(TSS4) / np.sum(TSS4>0)
 
-    f = open("Sediment_Indices.txt", "a")
+    Ratio = (ndwiG/ndwiM)
+    Ratio = Ratio * water
+    Ratio = np.sum(Ratio)/ np.sum(Ratio>0) 
+
+
+    f = open("Sediment_Indices5day.txt", "a")
     f.write(str(startDate) + ", " + str(endDate) + ", " + str(TSS1) + ", " + 
             str(Secchi1) + ", " + 
             str(TSS2) + ", " + str(Secchi2) + ", " + 
-            str(TSS3) + ", " + str(Secchi3) + ", " + str(TSS4) + '\n') 
+            str(TSS3) + ", " + str(Secchi3) + ", " + 
+            str(TSS4) + "," + str(Ratio) + '\n') 
+            
     f.close()
 
 for i in range(len(dates)):
