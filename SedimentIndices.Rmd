@@ -29,6 +29,10 @@ $$
 \frac {R}{G} + {IR}
 $$
 
+$$
+\frac {ndwiG}{ndwiM}
+$$
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
@@ -43,6 +47,9 @@ balule = read_csv("/Users/hydro3/Documents/R-Tommy/Kruger-National-Park-Sensors/
 #balule <- balule[1:19456, ]
 balule.datenum <-balule%>%
     mutate(datenum = as.numeric(as_date(as_datetime(X1))))%>%
+    mutate(hr=hour(as_datetime(X1))) %>%
+    filter (hr<12)%>%
+    filter(hr >= 2)%>%
     group_by(datenum) %>%
     summarize(MeanTurb = mean(as.numeric(X5)))
 
@@ -57,29 +64,29 @@ sedind10d = read_delim("/Users/hydro3/Documents/R-Tommy/sediment/Sediment_Indice
 
 
 ```{r, include=F}
-start = array(NA, dim = 66)
-end = start
+start = array(NA, dim = 132)
+#end = start
 start[1] = as_date("2022-08-01") #start date
-for (i in c(2:66)) {
-  start[i]=start[i-1]+10
+for (i in c(2:132)) {
+  start[i]=start[i-1]+5
 }
 
-for (i in c(1:66)) {
-  end[i]=start[i]+9
-}
+#for (i in c(1:132)) {
+#  end[i]=start[i+5]
+#}
 
-dates = data.frame (start, end)
+dates = data.frame(start)
 balule$daterange = 0
 for (i in (1:nrow(balule))) {
   test <- as_date(as_datetime(balule$X1[i]))
   for (j in 1:nrow(dates)) {
-    if ((dates$start[j] <= test) & (test <= dates$end[j]))
+    if ((dates$start[j] == test))
       balule$daterange[i] <- j
   }
 }
 
 balule$X5 <- as.numeric(balule$X5)
-balule10day <- balule %>%
+balulesatday <- balule %>%
   group_by(daterange) %>%
   summarize(MeanTurb = mean(X5))
 
@@ -88,17 +95,17 @@ balule10day <- balule %>%
 ```
 
 ```{r, include=F}
-sentinel <- read_csv("/Users/hydro3/Documents/R-Tommy/sediment/Sediment_Indices.txt", col_names = F)
+sentinel <- read_csv("/Users/hydro3/Documents/R-Tommy/sediment/Sediment_Indices5day.txt", col_names = F)
 
 
 sentinel$sensor <- NA
-for (i in (1:nrow(balule10day))) {
-  sentinel$sensor[balule10day$daterange[i]] <- balule10day$MeanTurb[i]
+for (i in (1:nrow(balulesatday))) {
+  sentinel$sensor[balulesatday$daterange[i]] <- balulesatday$MeanTurb[i]
 }
 ```
 
 ```{r, warning=F, echo = F}
-plot1 <- ggplot(data=sentinel, mapping= aes(x= sensor, y=X3) ) +
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X3) ) +
   geom_point()
 X3c <- cor(sentinel$X3, sentinel$sensor, use = "complete.obs")
 ```
@@ -153,6 +160,14 @@ X9c <- cor(sentinel$X9, sentinel$sensor, use = "complete.obs")
 
 For X9, the correlation coefficient is $c=$ `r X9c`.
 
+```{r, warning=F, echo = F}
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X10) ) +
+  geom_point()
+X10c <- cor(sentinel$X10, sentinel$sensor, use = "complete.obs")
+```
+
+For X10, the correlation coefficient is $c=$ `r X10c`.
+
 ```{r, warning=F, echo=F}
 plot1 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X3))+
   geom_point()+
@@ -193,21 +208,31 @@ gplot6 <- ggplotGrob(plot6)
 
 plot7 <- ggplot(data = sentinel, mapping=aes(x=X1, y= X9))+
   geom_point()+
-  labs(x="Date", y="TSS3")
+  labs(x="Date", y="TSS4")
 
 gplot7 <- ggplotGrob(plot7)
 
-plot8 <- ggplot(data = sentinel, mapping=aes(x=X1, y= sensor))+
-  geom_point()+
-  labs(x="Date", y="sensor")
+plot8 <- ggplot(data = sentinel, mapping = aes(x=X1, y=X10))+
+  geom_point()+ 
+  labs(x="Date", y= "NDWI")
 
 gplot8 <- ggplotGrob(plot8)
 
-grid::grid.newpage()
-plot9 <- grid::grid.draw(rbind(gplot1, gplot2, gplot3, gplot4))
+
+plot9 <- ggplot(data = sentinel, mapping=aes(x=X1, y= sensor))+
+  geom_point()+
+  labs(x="Date", y="sensor")
+
+gplot9 <- ggplotGrob(plot9)
 
 grid::grid.newpage()
-plot10 <- grid::grid.draw(rbind(gplot5, gplot6, gplot7, gplot8))
+plot10 <- grid::grid.draw(rbind(gplot1, gplot2, gplot3))
+
+grid::grid.newpage()
+plot11 <- grid::grid.draw(rbind(gplot4, gplot5, gplot6))
+
+grid::grid.newpage()
+plot12 <- grid::grid.draw(rbind(gplot7, gplot8, gplot9))
 ```
 
 
