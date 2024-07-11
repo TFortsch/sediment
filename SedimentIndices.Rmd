@@ -49,7 +49,7 @@ balule.datenum <-balule%>%
     mutate(datenum = as.numeric(as_date(as_datetime(X1))))%>%
     mutate(hr=hour(as_datetime(X1))) %>%
     filter (hr<12)%>%
-    filter(hr >= 2)%>%
+    filter(hr >= 6)%>%
     group_by(datenum) %>%
     summarize(MeanTurb = mean(as.numeric(X5)))
 
@@ -87,7 +87,7 @@ for (i in (1:nrow(balule))) {
 
 balule$X5 <- as.numeric(balule$X5)
 balulesatday <- balule %>%
-  group_by(daterange) %>%
+  #group_by(daterange) %>%
   summarize(MeanTurb = mean(X5))
 
 
@@ -100,7 +100,7 @@ sentinel <- read_csv("/Users/hydro3/Documents/R-Tommy/sediment/Sediment_Indices5
 
 sentinel$sensor <- NA
 for (i in (1:nrow(balulesatday))) {
-  sentinel$sensor[balulesatday$daterange[i]] <- balulesatday$MeanTurb[i]
+  sentinel$sensor[balulesatday$daterange[i]] <- balule5day$MeanTurb[i]
 }
 ```
 

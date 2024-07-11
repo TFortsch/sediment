@@ -1,0 +1,130 @@
+---
+title: "Hanover"
+author: "Tommy"
+date: "2024-07-02"
+output: html_document
+---
+
+$$
+\frac {G+R}{2}
+$$
+
+$$
+\frac {B}{R}
+$$
+
+$$
+\frac {G}{R}
+$$
+
+$$
+\frac {R}{G}
+$$
+
+$$
+\frac {IR}{G},\frac{IR}{R}
+$$
+
+$$
+\frac {R}{B} + {B}
+$$
+
+$$
+\frac {R}{G} + {IR}
+$$
+
+$$
+\frac {ndwiG}{ndwiM}
+$$
+
+```{r, include =F, warning=FALSE, echo=FALSE, results='hide'}
+hanover = read_csv("/Users/hydro3/Documents/USGSSites/csv_files_for_sites/Hanover_VA_Site_Data.csv")
+#balule <- balule[1:19456, ]
+hanover.datenum <-hanover%>%
+    mutate(datenum = as.numeric(mdy(Date)))%>%
+    #mutate(hr=hour(as_datetime(X1))) %>%
+    #filter (hr<12)%>%
+    #filter(hr >= 2)%>%
+    group_by(datenum) %>%
+    summarize(MeanTurb = mean(as.numeric(`Turb (FNU)`)))
+
+#ggplot(data = balule.datenum, mapping = aes (x=as_date(datenum), y = MeanTurb))+
+#  geom_line()
+```
+
+```{r, include=F}
+start <- as.numeric(ymd("2017-08-08"))
+end <- as.numeric(ymd("2024-06-26"))
+per <- 10 # period in days
+span <- ceiling((end - start + 1) / per)
+
+dates <- array(NA, dim = span)
+dates[1] <- start
+for (i in c(2:span)) {
+  dates[i] <- dates[i-1] + 10
+}
+dates = data.frame(dates)
+
+hanover$daterange = 0
+for (i in (1:nrow(hanover))) {
+  test <- as.numeric(mdy(hanover$Date[i]))
+  for (j in 1:nrow(dates)) {
+    if ((dates$dates[j] == test)) {
+      hanover$daterange[i] <- j
+     # print(j)
+    }
+  }
+}
+
+#hanover$X5 <- as.numeric(balule$X5)
+hanoversatday <- hanover %>%
+  group_by(daterange) %>%
+  summarize(MeanTurb = mean(`Turb (FNU)`, na.rm = TRUE)) %>%
+  filter(daterange > 0)
+
+hanoversatday$dt <- NA
+for (i in 1:nrow(hanoversatday)) {
+  hanoversatday$dt[i] <- dates$dates[i]
+}
+
+#ggplot(data = )
+```
+
+```{r, include=F}
+sentinel <- read_csv("/Users/hydro3/Documents/R-Tommy/sediment/Hanover10day.txt", col_names = F)
+
+
+hanoversatday$TSS1 <- NA
+hanoversatday$Sec1 <- NA
+hanoversatday$TSS2 <- NA
+hanoversatday$Sec2 <- NA
+hanoversatday$TSS3 <- NA
+hanoversatday$Sec3 <- NA
+hanoversatday$TSS4 <- NA
+hanoversatday$Rati <- NA
+for (i in (1:nrow(hanoversatday))) {
+  test <- as.numeric(mdy(hanoversatday$dt[i]))
+  for (j in 1:nrow(sentinel)) {
+    test2 <- as.numeric(as_date(sentinel$X1[j]))
+    if ((test2 == test)) {
+      hanoversatday$TSS1[i] <- sentinel$X3[j]
+      hanoversatday$Sec1[i] <- sentinel$X4[j]
+      hanoversatday$TSS2[i] <- sentinel$X5[j]
+      hanoversatday$Sec2[i] <- sentinel$X6[j]
+      hanoversatday$TSS3[i] <- sentinel$X7[j]
+      hanoversatday$Sec3[i] <- sentinel$X8[j]
+      hanoversatday$TSS4[i] <- sentinel$X9[j]
+      hanoversatday$Rati[i] <- sentinel$X10[j]
+     # print(j)
+    }
+  }
+}
+  sentinel$sensor[hanoversatday$daterange[i]] <- hanoversatday$MeanTurb[i]
+}
+```
+```{r, warning=F, echo = F}
+ggplot(data=sentinel, mapping= aes(x= sensor, y=X3) ) +
+  geom_point()
+X3c <- cor(sentinel$X3, sentinel$sensor, use = "complete.obs")
+```
+
