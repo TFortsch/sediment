@@ -23,10 +23,10 @@ ee.Initialize(project = 'ee-fortschthomas52')
 # the analysis area is transformed into a rectangle in the .sampleRectangle/.getInfo phases
 # enter shapefiles here:
 #sf = shapefile.Reader("/Volumes/dmk/gis/limpopo/kruger/logger_sites/reference_polygons/balule/balule.shp")
-sf = shapefile.Reader("/Users/hydro3/Documents/KrugerSensors/reference_polygons/balule/balule.shp")
-shapes = sf.shapes()
-points = shapes[0].points
-aoi = ee.Geometry.Polygon(points)
+# sf = shapefile.Reader("/Users/hydro3/Documents/KrugerSensors/reference_polygons/balule/balule.shp")
+# shapes = sf.shapes()
+# points = shapes[0].points
+# aoi = ee.Geometry.Polygon(points)
 
 aoi = ee.Geometry.Polygon(
           [[31.717329298139624, -24.055719459004635],
@@ -74,15 +74,15 @@ def pulldata(startDate, endDate):
     b8 = np.array(band_arr_b8.getInfo())   # b8  NIR
     b11 = np.array(band_arr_b11.getInfo()) # b11 SWIR
 
-    #np_arr_b4 = np.expand_dims(b4, 2)
-    #np_arr_b3 = np.expand_dims(b3, 2)
-    #np_arr_b2 = np.expand_dims(b2, 2)
+    np_arr_b4 = np.expand_dims(b4, 2)
+    np_arr_b3 = np.expand_dims(b3, 2)
+    np_arr_b2 = np.expand_dims(b2, 2)
 
-    #rgb_img = np.concatenate((np_arr_b4, np_arr_b3, np_arr_b2), 2)
+    rgb_img = np.concatenate((np_arr_b4, np_arr_b3, np_arr_b2), 2)
 
-    #rgb_img = (255*((rgb_img)/3000)).astype('uint8')
-    #plt.imshow(rgb_img)
-    #plt.show()
+    rgb_img = (255*((rgb_img)/3000)).astype('uint8')
+    plt.imshow(rgb_img)
+    plt.show()
 
 # Normalized Difference Water Index (NDWI) 
 # NDWI = ( G - NIR ) / ( G + NIR )
@@ -141,7 +141,7 @@ def pulldata(startDate, endDate):
     Ratio = np.sum(Ratio)/ np.sum(Ratio>0) 
 
 
-    f = open("Sediment_Indices5day.txt", "a")
+    f = open("Sediment_Indices5dayTest.txt", "a")
     f.write(str(startDate) + ", " + str(endDate) + ", " + str(TSS1) + ", " + 
             str(Secchi1) + ", " + 
             str(TSS2) + ", " + str(Secchi2) + ", " + 

@@ -10,26 +10,14 @@ import pandas as pd
 ee.Authenticate()
 ee.Initialize(project = 'ee-fortschthomas52')
 
-sf = shapefile.Reader("/Users/hydro3/Documents/USGSSites/shape_files/pennsylvania/Valley_Forge.shp")
+sf = shapefile.Reader("/Users/hydro3/Documents/USGSSites/shape_files/ohio/painesville.shp")
 shapes = sf.shapes()
 points = shapes[0].points
 aoi = ee.Geometry.Polygon(points)
 
-#aoi = ee.Geometry.Polygon(
-#        [[-75.46058743999999763, 40.07998496999999816],
-#        [-75.46054359999999406, 40.07955842999999874],	
-#        [-75.46041832296344865, 40.07940505999999914],	
-#        [-75.46060622999999623, 40.0785279999999986],
-#        [-75.46062502403982819, 40.07838421818735242],
-#        [-75.4609507348268238, 40.07834587628676815],
-#        [-75.46090688914397049, 40.0786238545767759],	
-#        [-75.46081919777823543, 40.07929003930824763],	
-#        [-75.46091315281292111, 40.0797836827827112],
-#        [-75.46104468999999426, 40.07996579999999653]], None, False)
-
-start = pd.date_range(start= '2018-10-06' , end='2024-06-21' , 
+start = pd.date_range(start= '2017-12-05' , end='2017-12-22' , 
               freq='5d')
-end = pd.date_range(start='2018-10-10' , end='2024-06-26' , 
+end = pd.date_range(start='2017-12-09' , end='2017-12-26' , 
               freq='5d')
 dates = pd.DataFrame ({'start': start ,  'end': end})
 
@@ -48,8 +36,8 @@ def pulldata(startDate, endDate):
 # Export arrays
 # https://gist.github.com/jdbcode/f4d56d72f7fc5beeaa3859999b1f5c3d
 # https://gist.github.com/jdbcode/f4d56d72f7fc5beeaa3859999b1f5c3d?permalink_comment_id=3355627#gistcomment-3355627
-    mosaic = image.median().reproject(crs='EPSG:32736', scale=1) # This allows us to set the resolution.
-    band_arrs = mosaic.sampleRectangle(region=aoi)
+    mosaic = image.median().reproject(crs='EPSG:32617', scale=10) # This allows us to set the resolution.
+    band_arrs = mosaic.sampleRectangle(region=aoi, defaultValue = 0)
 
 # Get individual band arrays.
     band_arr_b2 = band_arrs.get('B2')   # Blue
@@ -65,7 +53,7 @@ def pulldata(startDate, endDate):
     b8 = np.array(band_arr_b8.getInfo())   # b8  NIR
     b11 = np.array(band_arr_b11.getInfo()) # b11 SWIR
     if(np.max(b2)!=0):
-
+        
     #np_arr_b4 = np.expand_dims(b4, 2)
     #np_arr_b3 = np.expand_dims(b3, 2)
     #np_arr_b2 = np.expand_dims(b2, 2)
@@ -133,7 +121,7 @@ def pulldata(startDate, endDate):
         Ratio = np.sum(Ratio)/ np.sum(Ratio>0) 
 
 
-        f = open("Valley_Forge10day.txt", "a")
+        f = open("Painesville5day.txt", "a")
         f.write(str(startDate) + ", " + str(endDate) + ", " + 
                 str(TSS1) + ", " + str(Secchi1) + ", " + 
                 str(TSS2) + ", " + str(Secchi2) + ", " + 
